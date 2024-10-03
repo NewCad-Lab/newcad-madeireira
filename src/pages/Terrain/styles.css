@@ -1,7 +1,9 @@
 .terrain{
     background-color: forestgreen;
-    width: 20vw;
-    height: 20vh;
-    
-
+    width: 30vw;
+    height: 50vh;
+    margin-left: 15rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

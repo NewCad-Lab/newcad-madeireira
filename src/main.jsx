@@ -6,8 +6,9 @@
 
   createRoot(document.getElementById('root')).render(
     <StrictMode>
+      <div className='flex-container'>
       <Terrain />
       <Home />
-      
+      </div>
     </StrictMode>,
   )
