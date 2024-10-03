@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import './styles.css'
-import { buySeed } from './buttons';
 import { fastFoward } from './buttons';
 
  export function Home() {
@@ -14,7 +13,7 @@ import { fastFoward } from './buttons';
 
       <div className='container-buttons'>
         <div className='button-item'>
-          <button id="button" className='button-seed' >
+          <button id="button" className='button-seed' onClick={() => setSeeds (seeds-1)}>
             <img src="https://www.svgrepo.com/show/130645/seeds.svg" alt="Seed" />
           </button>
         <p>Quantidade de sementes: {seeds}</p>

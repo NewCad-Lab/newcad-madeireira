@@ -2,8 +2,9 @@ import './styles.css'
 
 export function Terrain(){
     return(
-        <div className="terrain">
-           
-        </div>
+        <main>
+        <div className="sun"></div>
+        <div className="terrain"></div>
+        </main>
     )
 }
