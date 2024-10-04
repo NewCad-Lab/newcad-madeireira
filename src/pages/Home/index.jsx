@@ -1,25 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './styles.css'
-import { fastFoward } from './buttons';
+import './stylesTerrain.css'
+
 
  export function Home() {
   const [seeds, setSeeds] = useState(3);
-  const [buySeeds, setBuySeeds] = useState({seeds})
+  const [log, setLog] = useState(0);
 
+    function buySeeds(){
+      if (log >=1){
+        setSeeds(seeds+2);
+        setLog(log-1);
+      }
+      else{
+        alert("troncos insuficientes")
+      }
+    }
 
+   
   return (
    <main>
+<div>
+  
+</div>
+
     <div className='container'>
 
       <div className='container-buttons'>
         <div className='button-item'>
-<<<<<<< HEAD
-          <button id="button" className='button-seed' >
-            <img className='imagem' src="https://www.svgrepo.com/show/130645/seeds.svg" alt="Seed" />
-=======
           <button id="button" className='button-seed' onClick={() => setSeeds (seeds-1)}>
             <img src="https://www.svgrepo.com/show/130645/seeds.svg" alt="Seed" />
->>>>>>> 03c3f3e1a2bb2c724d707c2b36bdd2032c700670
           </button>
         <p>Quantidade de sementes: {seeds}</p>
         </div>
@@ -32,7 +42,7 @@ import { fastFoward } from './buttons';
         </div>
 
         <div className='button-item'>
-          <button id="button" className='button-buy' onClick={() => setSeeds (seeds+ 2)}>
+          <button id="button" className='button-buy' onClick ={buySeeds}>
             <img className='imagem' src="https://www.svgrepo.com/show/283077/trees-wood.svg" alt="" />
           </button>
           <p>Comprar sementes</p>
@@ -47,12 +57,76 @@ import { fastFoward } from './buttons';
 
       </div>
 
+      <div className='log'>
+      <p>Troncos: {log}</p>
+      <img src="https://www.svgrepo.com/show/178406/wood-nature.svg" alt="" />
+      </div>
+
     </div>
     </main>
-
-
   );
-  
  }
 
+
+ export function Terrain() {
+  return (
+    <main>
+      <div className="sun">
+        <MoveSun />
+      </div>
+      <div className="terrain"></div>
+    </main>
+  );
+}
+
+function fastFoward(){
+  const interval = setInterval(() =>{
+  speed = 0.05;
+  },);
+
+  setTimeout(()=>{
+    clearInterval(interval);
+    speed = 0.01;
+  }, 5000);
+}
+
+let speed = 0.01;
+
+function MoveSun() {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const radius = 410;
+  const angleRef = useRef(0);
+
  
+  useEffect(() => {
+    const animate = () => {
+      angleRef.current += speed;
+      const x = radius * Math.cos(angleRef.current);
+      const y = radius * Math.sin(angleRef.current); 
+
+      setPosition({ x, y });
+
+      requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      angleRef.current = 0;
+    };
+  }, []);
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        top: `-16rem`,
+        left: `-5rem`,
+        transform: `translate(${position.x + 350}px, ${position.y + 550}px)`,
+        width: '50px',
+        height: '50px',
+        backgroundColor: 'yellow',
+        borderRadius: '50%',
+      }}
+    />
+  );
+}
