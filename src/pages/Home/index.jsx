@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import './styles.css'
 import './stylesTerrain.css'
 
-let speed = 0.01;
+let speed = 0.0090;
 
 export function Terrain({ field }) {
   console.log(field);
@@ -10,15 +10,15 @@ export function Terrain({ field }) {
     <main>
       <div className="sun">
         <MoveSun />
-      </div>    
+      </div>
 
-    <div className="terrain">
-      {Array.from(field.entries()).map(([key, state]) => (
-        <div key={key} className={`cell state-${state}`}>
-          {state}
-        </div>
-      ))}
-    </div>
+      <div className="terrain">
+        {Array.from(field.entries()).map(([key, state]) => (
+          <div key={key} className={`cell state-${state}`}>
+            {state}
+          </div>
+        ))}
+      </div>
     </main>
   );
 }
@@ -26,7 +26,6 @@ export function Terrain({ field }) {
 export function Home({ setField }) {
 
   const [seeds, setSeeds] = useState(3);
-
   const [log, setLog] = useState(0)
 
 
@@ -46,6 +45,7 @@ export function Home({ setField }) {
     setField(generatedField);
   }, [setField]);
 
+  
   function buySeeds() {
     if (log >= 1) {
       setSeeds(seeds + 2);
@@ -71,67 +71,73 @@ export function Home({ setField }) {
     }
   }
 
+  function minSeeds() {
+    if (seeds >= 1) { 
+    setSeeds(seeds - 1)}
+    else
+    {
+      alert("não tem")
+    }
+  }
+  function fastFoward() {
+    if (log >= 2) {
+      const interval = setInterval(() => {
+        speed = 0.02;
+        setLog(log -2)
+      },);
+  
+      setTimeout(() => {
+        clearInterval(interval);
+        speed = 0.018;
+      }, 5000);
+    }
+  }
 
-  return (
-    <main>
+return (
+  <main>
 
-      <div className='container'>
+    <div className='container'>
 
-        <div className='container-buttons'>
-          <div className='button-item'>
-            <button id="button" className='button-seed' onClick={() => setSeeds(seeds - 1)}>
-              <img src="https://www.svgrepo.com/show/130645/seeds.svg" alt="Seed" />
-            </button>
-            <p>Quantidade de sementes: {seeds}</p>
-          </div>
-
-          <div className='button-item'>
-            <button id="button" className='button-chop' onClick={() => setSeeds(seeds + 1)}>
-              <img className='imagem' src="https://www.svgrepo.com/show/7675/hatchet.svg" alt="Axe" />
-            </button>
-            <p>Cortar árvores</p>
-          </div>
-
-          <div className='button-item'>
-            <button id="button" className='button-buy' onClick={buySeeds}>
-              <img className='imagem' src="https://www.svgrepo.com/show/283077/trees-wood.svg" alt="" />
-            </button>
-            <p>Comprar sementes</p>
-          </div>
-
-          <div className='button-item'>
-            <button id="button" className="button-fast-foward" >
-              <img className='imagem' src="https://www.svgrepo.com/show/464927/fast-forward.svg" alt="" />
-            </button>
-            <p>Acelerar o tempo</p>
-          </div>
-
+      <div className='container-buttons'>
+        <div className='button-item'>
+          <button id="button" className='button-seed' onClick={minSeeds}>
+            <img src="https://www.svgrepo.com/show/130645/seeds.svg" alt="Seed" />
+          </button>
+          <p>Quantidade de sementes: {seeds}</p>
         </div>
 
-        <div className='log'>
-          <p>Troncos: {log}</p>
-          <img src="https://www.svgrepo.com/show/178406/wood-nature.svg" alt="" />
+        <div className='button-item'>
+          <button id="button" className='button-chop' onClick={chopTree}>
+            <img className='imagem' src="https://www.svgrepo.com/show/7675/hatchet.svg" alt="Axe" />
+          </button>
+          <p>Cortar árvores</p>
+        </div>
+
+        <div className='button-item'>
+          <button id="button" className='button-buy' onClick={buySeeds}>
+            <img className='imagem' src="https://www.svgrepo.com/show/283077/trees-wood.svg" alt="" />
+          </button>
+          <p>Comprar sementes</p>
+        </div>
+
+        <div className='button-item'>
+          <button id="button" className="button-fast-foward"  onClick={fastFoward}>
+            <img className='imagem' src="https://www.svgrepo.com/show/464927/fast-forward.svg" alt="" />
+          </button>
+          <p>Acelerar o tempo</p>
         </div>
 
       </div>
-    </main>
-  );
 
-}
+      <div className='log'>
+        <p>Troncos: {log}</p>
+        <img src="https://www.svgrepo.com/show/178406/wood-nature.svg" alt="" />
+      </div>
 
+    </div>
+  </main>
+);
 
-
-function fastFoward() {
-  if (log >= 2) {
-    const interval = setInterval(() => {
-      speed = 0.05;
-    },);
-
-    setTimeout(() => {
-      clearInterval(interval);
-      speed = 0.01;
-    }, 5000);
-  }
 }
 
 
@@ -174,16 +180,56 @@ function MoveSun() {
   );
 }
 
-export function nightSystem() {
-  const [backgroundColor, setBackgroundColor] = useState('background-color:rgba(69, 192, 233, 0.507)');
+export function NightSystem() {
+  const initialColor = 'rgba(69, 192, 233, 0.507)';
+  const darkColor = 'rgba(0, 51, 102, 0.507)'; 
+  const [backgroundColor, setBackgroundColor] = useState(initialColor);
+  const [isDarkening, setIsDarkening] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const newColor = rgb.map(value => Math.max(value - 10, 0));
-      setBackgroundColor(`rgb{$newColor.join(',')})`);
-    }, 500);
+      const rgba = backgroundColor.match(/(\d+\.?\d*)/g);
+      if (!rgba) return;
 
-  }
+      const rgb = rgba.slice(0, 3).map(Number);
+      let newColor;
 
-  )
+      if (isDarkening) {
+        newColor = rgb.map((value, index) => {
+          const minValue = [0, 51, 102][index];
+          return Math.max(value - 10, minValue);
+        });
+        
+        if (newColor.every((value, index) => value <= [0, 51, 102][index])) {
+          setIsDarkening(false);
+        }
+      } else {
+        newColor = rgb.map((value, index) => {
+          return Math.min(value + 10, [69, 192, 233][index]); 
+        });
+        
+        if (newColor.every((value, index) => value === Number(rgba[index]))) {
+          setIsDarkening(true); 
+        }
+      }
+
+      setBackgroundColor(`rgba(${newColor.join(',')}, ${rgba[3]})`);
+    }, 180);
+
+    return () => clearInterval(interval); 
+  }, [backgroundColor, isDarkening]);
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      height: '100vh',
+      width: '100vw',
+      backgroundColor,
+      zIndex: -1,
+      overflow: 'hidden'
+    }}>
+    </div>
+  );
 }
