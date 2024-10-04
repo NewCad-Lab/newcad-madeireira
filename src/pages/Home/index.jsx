@@ -5,25 +5,28 @@ import './stylesTerrain.css'
 let speed = 0.01;
 
 export function Terrain({ field }) {
-  console.log(field);
+  if (!field || field.size === 0) { 
+    return <div>Carregando o terreno...</div>; 
+  }
+
   return (
     <main>
       <div className="sun">
         <MoveSun />
-      </div>    
+      </div>
 
-    <div className="terrain">
-      {Array.from(field.entries()).map(([key, state]) => (
-        <div key={key} className={`cell state-${state}`}>
-          {state}
-        </div>
-      ))}
-    </div>
+      <div className="terrain">
+        {Array.from(field.entries()).map(([key, state]) => (
+          <div key={key} className={`cell state-${state}`}>
+            {state}
+          </div>
+        ))}
+      </div>
     </main>
   );
 }
 
-export function Home({ setField }) {
+export function Home({ field, setField }) {
 
   const [seeds, setSeeds] = useState(3);
 
@@ -42,13 +45,32 @@ export function Home({ setField }) {
   }
 
   useEffect(() => {
-    const generatedField = generateField();
-    setField(generatedField);
-  }, [setField]);
+    if (field && field.size === 0) { 
+      const generatedField = generateField();
+      setField(generatedField);
+    }
+  }, [field, setField]);
 
-  function buySeeds() {
-    if (log >= 1) {
-      setSeeds(seeds + 2);
+  function plant() {
+    const updatedField = new Map(field);
+    const maxRows = 5;
+    const maxCols = 5; 
+
+    // Filtra as células vazias (aquelas com valor 0)
+    const emptyCells = Array.from(updatedField.entries()).filter(([key, value]) => value === 0);
+
+    console.log("Células vazias:", emptyCells);
+
+    if (emptyCells.length > 0 && seeds > 0) {
+        const randomIndex = Math.floor(Math.random() * emptyCells.length);
+        const [key] = emptyCells[randomIndex]; 
+
+        updatedField.set(key, 1); 
+
+        setField(updatedField);
+        setSeeds(seeds - 1); 
+    } else {
+        alert("Não há células vazias ou não há sementes!");
     }
   }
 
@@ -79,7 +101,7 @@ export function Home({ setField }) {
 
         <div className='container-buttons'>
           <div className='button-item'>
-            <button id="button" className='button-seed' onClick={() => setSeeds(seeds - 1)}>
+            <button id="button" className='button-seed' onClick={plant}>
               <img src="https://www.svgrepo.com/show/130645/seeds.svg" alt="Seed" />
             </button>
             <p>Quantidade de sementes: {seeds}</p>

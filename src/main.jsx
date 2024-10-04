@@ -11,8 +11,8 @@ function App() {
   
   return (
     <div className='flex-container'>
-      <Terrain field={field} /> {}
-      <Home setField={setField} /> {}
+      <Terrain field={field} />
+      <Home field={field} setField={setField} /> 
     </div>
   );
 }
