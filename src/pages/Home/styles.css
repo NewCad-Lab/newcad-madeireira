@@ -59,7 +59,7 @@ background-color: lightgreen;
 .container-buttons{
 display: flex;
 flex-wrap: wrap;
-background-color:
+background-color: lightgreen;
 }
 
 .container .container-buttons button:hover{
