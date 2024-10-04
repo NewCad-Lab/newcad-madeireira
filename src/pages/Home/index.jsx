@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import './styles.css'
 import './stylesTerrain.css'
 
-
+let speed = 0.01;
  export function Home() {
   const [seeds, setSeeds] = useState(3);
   const [log, setLog] = useState(0);
@@ -80,17 +80,18 @@ import './stylesTerrain.css'
 }
 
 function fastFoward(){
-  const interval = setInterval(() =>{
-  speed = 0.05;
-  },);
+  if (log >= 2){
+    const interval = setInterval(() =>{
+    speed = 0.05;
+    },);
 
-  setTimeout(()=>{
-    clearInterval(interval);
-    speed = 0.01;
-  }, 5000);
+    setTimeout(()=>{
+      clearInterval(interval);
+      speed = 0.01;
+    }, 5000);
+  }
 }
 
-let speed = 0.01;
 
 function MoveSun() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -129,4 +130,17 @@ function MoveSun() {
       }}
     />
   );
+}
+
+export function nightSystem(){
+const[backgroundColor, setBackgroundColor] = useState('background-color:rgba(69, 192, 233, 0.507)');
+
+useEffect(()=>{
+  const interval = setInterval(()=>{
+   const newColor =rgb.map(value =>Math.max(value- 10,0));
+    setBackgroundColor(`rgb{$newColor.join(',')})`);},500);
+
+  }
+
+  )
 }
