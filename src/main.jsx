@@ -1,5 +1,6 @@
 
   import { createRoot } from 'react-dom/client'
+  import React, { StrictMode, useState } from 'react';
   import './styles/global.css'
   import {Home} from './pages/Home'
   import { Terrain } from './pages/Home/index' 
