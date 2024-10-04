@@ -2,11 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import './styles.css'
 import './stylesTerrain.css'
 
-let speed = 0.01;
+let speed = 0.0090;
 
 export function Terrain({ field }) {
-  if (!field || field.size === 0) { 
-    return <div>Carregando o terreno...</div>; 
+  if (!field || field.size === 0) {
+    return <div>Carregando o terreno...</div>;
   }
 
   return (
@@ -15,6 +15,7 @@ export function Terrain({ field }) {
         <MoveSun />
       </div>
 
+
       <div className="terrain">
         {Array.from(field.entries()).map(([key, state]) => (
           <div key={key} className={`cell state-${state}`}>
@@ -22,6 +23,7 @@ export function Terrain({ field }) {
           </div>
         ))}
       </div>
+
     </main>
   );
 }
@@ -29,7 +31,6 @@ export function Terrain({ field }) {
 export function Home({ field, setField }) {
 
   const [seeds, setSeeds] = useState(3);
-
   const [log, setLog] = useState(0)
 
 
@@ -45,7 +46,7 @@ export function Home({ field, setField }) {
   }
 
   useEffect(() => {
-    if (field && field.size === 0) { 
+    if (field && field.size === 0) {
       const generatedField = generateField();
       setField(generatedField);
     }
@@ -54,7 +55,7 @@ export function Home({ field, setField }) {
   function plant() {
     const updatedField = new Map(field);
     const maxRows = 5;
-    const maxCols = 5; 
+    const maxCols = 5;
 
     // Filtra as células vazias (aquelas com valor 0)
     const emptyCells = Array.from(updatedField.entries()).filter(([key, value]) => value === 0);
@@ -62,15 +63,15 @@ export function Home({ field, setField }) {
     console.log("Células vazias:", emptyCells);
 
     if (emptyCells.length > 0 && seeds > 0) {
-        const randomIndex = Math.floor(Math.random() * emptyCells.length);
-        const [key] = emptyCells[randomIndex]; 
+      const randomIndex = Math.floor(Math.random() * emptyCells.length);
+      const [key] = emptyCells[randomIndex];
 
-        updatedField.set(key, 1); 
+      updatedField.set(key, 1);
 
-        setField(updatedField);
-        setSeeds(seeds - 1); 
+      setField(updatedField);
+      setSeeds(seeds - 1);
     } else {
-        alert("Não há células vazias ou não há sementes!");
+      alert("Não há células vazias ou não há sementes!");
     }
   }
 
@@ -93,6 +94,27 @@ export function Home({ field, setField }) {
     }
   }
 
+  function minSeeds() {
+    if (seeds >= 1) {
+      setSeeds(seeds - 1)
+    }
+    else {
+      alert("não tem")
+    }
+  }
+  function fastFoward() {
+    if (log >= 2) {
+      const interval = setInterval(() => {
+        speed = 0.02;
+        setLog(log - 2)
+      },);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        speed = 0.018;
+      }, 5000);
+    }
+  }
 
   return (
     <main>
@@ -108,7 +130,7 @@ export function Home({ field, setField }) {
           </div>
 
           <div className='button-item'>
-            <button id="button" className='button-chop' onClick={() => setSeeds(seeds + 1)}>
+            <button id="button" className='button-chop' onClick={chopTree}>
               <img className='imagem' src="https://www.svgrepo.com/show/7675/hatchet.svg" alt="Axe" />
             </button>
             <p>Cortar árvores</p>
@@ -122,7 +144,7 @@ export function Home({ field, setField }) {
           </div>
 
           <div className='button-item'>
-            <button id="button" className="button-fast-foward" >
+            <button id="button" className="button-fast-foward" onClick={fastFoward}>
               <img className='imagem' src="https://www.svgrepo.com/show/464927/fast-forward.svg" alt="" />
             </button>
             <p>Acelerar o tempo</p>
@@ -139,21 +161,6 @@ export function Home({ field, setField }) {
     </main>
   );
 
-}
-
-
-
-function fastFoward() {
-  if (log >= 2) {
-    const interval = setInterval(() => {
-      speed = 0.05;
-    },);
-
-    setTimeout(() => {
-      clearInterval(interval);
-      speed = 0.01;
-    }, 5000);
-  }
 }
 
 
@@ -196,16 +203,56 @@ function MoveSun() {
   );
 }
 
-export function nightSystem() {
-  const [backgroundColor, setBackgroundColor] = useState('background-color:rgba(69, 192, 233, 0.507)');
+export function NightSystem() {
+  const initialColor = 'rgba(69, 192, 233, 0.507)';
+  const darkColor = 'rgba(0, 51, 102, 0.507)';
+  const [backgroundColor, setBackgroundColor] = useState(initialColor);
+  const [isDarkening, setIsDarkening] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const newColor = rgb.map(value => Math.max(value - 10, 0));
-      setBackgroundColor(`rgb{$newColor.join(',')})`);
-    }, 500);
+      const rgba = backgroundColor.match(/(\d+\.?\d*)/g);
+      if (!rgba) return;
 
-  }
+      const rgb = rgba.slice(0, 3).map(Number);
+      let newColor;
 
-  )
+      if (isDarkening) {
+        newColor = rgb.map((value, index) => {
+          const minValue = [0, 51, 102][index];
+          return Math.max(value - 10, minValue);
+        });
+
+        if (newColor.every((value, index) => value <= [0, 51, 102][index])) {
+          setIsDarkening(false);
+        }
+      } else {
+        newColor = rgb.map((value, index) => {
+          return Math.min(value + 10, [69, 192, 233][index]);
+        });
+
+        if (newColor.every((value, index) => value === Number(rgba[index]))) {
+          setIsDarkening(true);
+        }
+      }
+
+      setBackgroundColor(`rgba(${newColor.join(',')}, ${rgba[3]})`);
+    }, 180);
+
+    return () => clearInterval(interval);
+  }, [backgroundColor, isDarkening]);
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      height: '100vh',
+      width: '100vw',
+      backgroundColor,
+      zIndex: -1,
+      overflow: 'hidden'
+    }}>
+    </div>
+  );
 }
