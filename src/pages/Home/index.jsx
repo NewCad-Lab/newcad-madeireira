@@ -1,6 +1,6 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './styles.css'
+import './stylesTerrain.css'
 
 export function Terrain({ field }) {
   console.log(field);
@@ -39,9 +39,9 @@ export function Terrain({ field }) {
   }, [setField]);
 
   function buySeeds() {
-   // if(log >= 1){
+    if(log >= 1){
     setSeeds(seeds + 2);
-    //}
+    }
   }
 
   function chopTree(){
@@ -53,7 +53,17 @@ export function Terrain({ field }) {
     }
   }
 
+    function buySeeds(){
+      if (log >=1){
+        setSeeds(seeds+2);
+        setLog(log-1);
+      }
+      else{
+        alert("troncos insuficientes")
+      }
+    }
 
+   
   return (
    <main>
 
@@ -75,7 +85,7 @@ export function Terrain({ field }) {
         </div>
 
         <div className='button-item'>
-          <button id="button" className='button-buy' onClick={buySeeds}>
+          <button id="button" className='button-buy' onClick ={buySeeds}>
             <img className='imagem' src="https://www.svgrepo.com/show/283077/trees-wood.svg" alt="" />
           </button>
           <p>Comprar sementes</p>
@@ -90,10 +100,78 @@ export function Terrain({ field }) {
 
       </div>
 
+      <div className='log'>
+      <p>Troncos: {log}</p>
+      <img src="https://www.svgrepo.com/show/178406/wood-nature.svg" alt="" />
+      </div>
+
     </div>
     </main>
-
-
   );
   
- }
+  }
+ 
+
+
+ export function Terrain() {
+  return (
+    <main>
+      <div className="sun">
+        <MoveSun />
+      </div>
+      <div className="terrain"></div>
+    </main>
+  );
+}
+
+function fastFoward(){
+  const interval = setInterval(() =>{
+  speed = 0.05;
+  },);
+
+  setTimeout(()=>{
+    clearInterval(interval);
+    speed = 0.01;
+  }, 5000);
+}
+
+let speed = 0.01;
+
+function MoveSun() {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const radius = 410;
+  const angleRef = useRef(0);
+
+ 
+  useEffect(() => {
+    const animate = () => {
+      angleRef.current += speed;
+      const x = radius * Math.cos(angleRef.current);
+      const y = radius * Math.sin(angleRef.current); 
+
+      setPosition({ x, y });
+
+      requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      angleRef.current = 0;
+    };
+  }, []);
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        top: `-16rem`,
+        left: `-5rem`,
+        transform: `translate(${position.x + 350}px, ${position.y + 550}px)`,
+        width: '50px',
+        height: '50px',
+        backgroundColor: 'yellow',
+        borderRadius: '50%',
+      }}
+    />
+  );
+}

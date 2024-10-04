@@ -52,6 +52,9 @@ background: #9be15d;
     to right,
     #9be15d,#00e3ae
   );
+border: 1px solid #000;
+right: -18rem;
+background-color: lightgreen;
 }
 .container-buttons{
 display: flex;
@@ -60,15 +63,14 @@ background-color:
 }
 
 .container .container-buttons button:hover{
-    background-color: rgb(102, 240, 113);
+background-color: rgb(102, 240, 113);
     
 } 
 
 .container .container-buttons button{
 height: 10rem;
 width: 20rem;
-position: relative;
-z-index: 2;
+background-color: rgba(153, 18, 216, 0.082);
 padding: 2px;
 margin-top: 1.5rem;
 margin-left: 2.6rem;
@@ -86,7 +88,9 @@ font-size: large;
 font-weight: 600;
 margin-top: 5px;
 font-family: roboto;
+background-color: lightgreen;
 }
+
 .container-buttons button img{
 width: 4rem;
 background-color: rgb(26, 109, 26);
@@ -95,6 +99,24 @@ transition: background-color,  0.3s ease-in-out;
 }
 
 .container-buttons button:hover img{
-    background-color: rgb(102, 240, 113);
+background-color: rgb(102, 240, 113);
 }
 
+.container .log{
+    background-color: lightgreen;
+    & p{
+        background-color: lightgreen;
+        margin-left: 1rem;
+        top: 22.5rem;
+        font-size: large;
+        font-weight: 600;
+        font-family: roboto;
+    }
+}
+.container .log img{
+    width: 4rem;
+    height: auto;
+    background-color: lightgreen;
+    margin-left: 1rem;
+    top: 22.5rem;
+}
