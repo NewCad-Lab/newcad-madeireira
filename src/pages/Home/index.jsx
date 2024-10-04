@@ -5,9 +5,6 @@ import './stylesTerrain.css'
 let speed = 0.0090;
 
 export function Terrain({ field }) {
-  if (!field || field.size === 0) {
-    return <div>Carregando o terreno...</div>;
-  }
 
   return (
     <main>
