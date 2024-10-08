@@ -5,10 +5,13 @@ import './stylesTerrain.css'
 let speed = 0.0050;
 
 export function Terrain({ field }) {
+<<<<<<< HEAD
   const images = {       
     1: 'https://www.svgrepo.com/show/335280/seed.svg',   
     2: 'https://www.svgrepo.com/show/530307/tree.svg',          
   };
+=======
+>>>>>>> b2e2df761f516b0d83fbea942c289ca00c3b395d
 
   return (
     <main>
