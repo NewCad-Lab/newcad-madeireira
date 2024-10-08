@@ -1,65 +1,109 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './styles.css'
-import './stylesTerrain.css'
+import './styles.css';
+import Terrain from '../../components/Terrain';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+
+
+
 
 let speed = 0.0050;
 
-export function Terrain({ field }) {
-  const images = {       
-    1: 'https://www.svgrepo.com/show/335280/seed.svg',   
-    2: 'https://www.svgrepo.com/show/530307/tree.svg',          
+export function Home() {
+  const [field, setField] = useState(Array(5).fill(0).map(() => Array(5).fill(0)));
+  const [seeds, setSeeds] = useState(3);
+  const [log, setLog] = useState(0)
+
+
+  const colors = [
+    '#27a50a',
+    '#4cb00d',
+    '#64b624',
+    '#41dd12',
+    '#51f238',
+    '#8ab480',
+    '#5d9f72',
+    '#317e56',
+  ];
+
+  const getRandomColor = () => {
+    return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  return (
-    <main>
-      <div className="sun">
-        <MoveSun />
-      </div>
-      <div className="terrain">
-        {Array.from(field.entries()).map(([key, state]) => (
-          <div key={key} className={`cell state`}>
-          {state === 0 ? null : <img src={images[state]} alt={''} />}
-          </div>
-        ))}
-      </div>
-    </main>
-  );
-}
 
-export function Home({ field, setField }) {
+  const Plane = () => {
+    const grid = [];
 
-  const [seeds, setSeeds] = useState(3);
-  const [log, setLog] = useState(0);
-  
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 5; j++) {
+        grid.push(
+          <mesh key={`box-${i}-${j}`} position={[i, 0, j]}>
+            <boxGeometry args={[1, 0.2, 1]} />
+            <meshStandardMaterial color={"green"} />
+          </mesh>
+        );
 
-  function generateField() {
-    const field = new Map();
-    for (let row = 0; row < 5; row++) {
-      for (let col = 0; col < 5; col++) {
-        const key = `${row},${col}`;
-        field.set(key, 0); //0 = vazio, 1 = plantado, 2 = arvore1, 3 = arvore2
+        if (field[i][j] === 1) {
+          grid.push(
+            <mesh key={`sphere-${i}-${j}`} position={[i, 0.11, j]}>
+              <sphereGeometry args={[0.025, 8, 8]} />
+              <meshStandardMaterial color={"brown"} />
+            </mesh>
+          );
+        } else if (field[i][j] === 2) {
+          grid.push(
+            <>
+              <mesh key={`minitree1-${i}-${j}`} position={[i, 0.16, j]}>
+                <cylinderGeometry args={[0.04, 0.05, 0.3]} />
+                <meshStandardMaterial color={"brown"} />
+              </mesh>
+              <mesh key={`minitree2-${i}-${j}`} position={[i, 0.5, j]}>
+                <cylinderGeometry args={[0.001, 0.15, 0.4]} />
+                <meshStandardMaterial color={getRandomColor()} />
+              </mesh>
+            </>
+          );
+        } else if (field[i][j] === 3) {
+          grid.push(
+            <>
+              <mesh key={`tree1-${i}-${j}`} position={[i, 0.4, j]}>
+                <cylinderGeometry args={[0.09, 0.12, 0.8]} />
+                <meshStandardMaterial color={"brown"} />
+              </mesh>
+              <mesh key={`tree2-${i}-${j}`} position={[i, 1, j]}>
+                <cylinderGeometry args={[0.15, 0.35, 0.35]} />
+                <meshStandardMaterial color={getRandomColor()} />
+              </mesh>
+              <mesh key={`tree25-${i}-${j}`} position={[i, 1.35, j]}>
+                <cylinderGeometry args={[0.01, 0.3, 0.4]} />
+                <meshStandardMaterial color={getRandomColor()} />
+              </mesh>
+            </>
+          );
+        }
       }
     }
-    return field;
-  }
 
-  useEffect(() => {
-    if (field && field.size === 0) {
-      const generatedField = generateField();
-      setField(generatedField);
-    }
-  }, [field, setField]);
+    return <>{grid}</>;
+  };
+
 
   function plant() {
-    const updatedField = new Map(field);
-    const emptyCells = Array.from(updatedField.entries()).filter(([_, value]) => value === 0);
-  
+
+    const emptyCells = [];
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 5; col++) {
+        if (field[row][col] === 0) {
+          emptyCells.push([row, col]);
+        }
+      }
+    }
+
     if (emptyCells.length > 0 && seeds > 0) {
-      const randomIndex = Math.floor(Math.random() * emptyCells.length);
-      const [cellKey] = emptyCells[randomIndex];
-  
-      updatedField.set(cellKey, 1);
-      setField(updatedField);
+      const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      const newField = field.map(r => [...r]);
+      newField[row][col] = 1;
+      setField(newField);
       setSeeds(seeds - 1);
 
       let timeToGrowth = 10000;
@@ -135,46 +179,51 @@ export function Home({ field, setField }) {
   
   
   return (
-    <main>
+    <main className="flex-container">
+      <div className="canvas-container">
+        <Canvas style={{ width: '100%', height: '100%' }}>
+          <OrbitControls />
+          <ambientLight intensity={1} />
+          <Terrain />
+          <Plane position={[-10, 0, 0]} field={field} />
+        </Canvas>
+      </div>
 
-      <div className='container'>
-
-        <div className='container-buttons'>
-          <div className='button-item'>
-            <button id="button" className='button-seed' onClick={plant}>
+      <div className="container">
+        <div className="container-buttons">
+          <div className="button-item">
+            <button id="button" className="button-seed" onClick={plant}>
               <img src="https://www.svgrepo.com/show/130645/seeds.svg" alt="Seed" />
             </button>
             <p>Quantidade de sementes: {seeds}</p>
           </div>
 
-          <div className='button-item'>
-            <button id="button" className='button-chop' onClick={chopTree}>
-              <img className='imagem' src="https://www.svgrepo.com/show/7675/hatchet.svg" alt="Axe" />
+          <div className="button-item">
+            <button id="button" className="button-chop" onClick={chopTree}>
+              <img className="imagem" src="https://www.svgrepo.com/show/7675/hatchet.svg" alt="Axe" />
             </button>
             <p>Cortar árvores</p>
           </div>
 
-          <div className='button-item'>
-            <button id="button" className='button-buy' onClick={buySeeds}>
-              <img className='imagem' src="https://www.svgrepo.com/show/283077/trees-wood.svg" alt="" />
+          <div className="button-item">
+            <button id="button" className="button-buy" onClick={buySeeds}>
+              <img className="imagem" src="https://www.svgrepo.com/show/283077/trees-wood.svg" alt="" />
             </button>
             <p>Comprar sementes</p>
           </div>
 
-          <div className='button-item'>
+          <div className="button-item">
             <button id="button" className="button-fast-foward" onClick={fastFoward}>
-              <img className='imagem' src="https://www.svgrepo.com/show/464927/fast-forward.svg" alt="" />
+              <img className="imagem" src="https://www.svgrepo.com/show/464927/fast-forward.svg" alt="" />
             </button>
             <p>Acelerar o tempo</p>
           </div>
-
         </div>
 
-        <div className='log'>
+        <div className="log">
           <p>Troncos: {log}</p>
           <img src="https://www.svgrepo.com/show/178406/wood-nature.svg" alt="" />
         </div>
-
       </div>
     </main>
   );
