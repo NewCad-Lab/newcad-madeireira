@@ -14,7 +14,7 @@ function App() {
     <div className='flex-container'>
       <NightSystem/>
       <Terrain field={field} /> {}
-      <Home setField={setField} /> {}
+      <Home field = {field} setField={setField} /> {}
     </div>
   );
 }

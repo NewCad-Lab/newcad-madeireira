@@ -2,28 +2,26 @@ import React, { useEffect, useRef, useState } from 'react';
 import './styles.css'
 import './stylesTerrain.css'
 
-let speed = 0.0090;
+let speed = 0.0050;
 
 export function Terrain({ field }) {
-  if (!field || field.size === 0) {
-    return <div>Carregando o terreno...</div>;
-  }
+  const images = {       
+    1: 'https://www.svgrepo.com/show/335280/seed.svg',   
+    2: 'https://www.svgrepo.com/show/530307/tree.svg',          
+  };
 
   return (
     <main>
       <div className="sun">
         <MoveSun />
       </div>
-
-
       <div className="terrain">
         {Array.from(field.entries()).map(([key, state]) => (
-          <div key={key} className={`cell state-${state}`}>
-            {state}
+          <div key={key} className={`cell state`}>
+          {state === 0 ? null : <img src={images[state]} alt={''} />}
           </div>
         ))}
       </div>
-
     </main>
   );
 }
@@ -31,8 +29,8 @@ export function Terrain({ field }) {
 export function Home({ field, setField }) {
 
   const [seeds, setSeeds] = useState(3);
-  const [log, setLog] = useState(0)
-
+  const [log, setLog] = useState(0);
+  
 
   function generateField() {
     const field = new Map();
@@ -54,33 +52,59 @@ export function Home({ field, setField }) {
 
   function plant() {
     const updatedField = new Map(field);
-    const maxRows = 5;
-    const maxCols = 5;
-
-    // Filtra as células vazias (aquelas com valor 0)
-    const emptyCells = Array.from(updatedField.entries()).filter(([key, value]) => value === 0);
-
-    console.log("Células vazias:", emptyCells);
+    const emptyCells = Array.from(updatedField.entries()).filter(([field, value]) => value === 0);
 
     if (emptyCells.length > 0 && seeds > 0) {
       const randomIndex = Math.floor(Math.random() * emptyCells.length);
-      const [key] = emptyCells[randomIndex];
+      const [field] = emptyCells[randomIndex];
 
-      updatedField.set(key, 1);
-
+      updatedField.set(field, 1);
       setField(updatedField);
       setSeeds(seeds - 1);
+
+      setTimeout(() => {
+        for (const [key, value] of updatedField.entries()) {
+          if (value === 1) {
+            updatedField.set(key, 2); 
+          }
+        }
+        
+        setField(new Map(updatedField)); 
+      }, 2000);
+
     } else {
       alert("Não há células vazias ou não há sementes!");
     }
+
   }
 
+ 
   function chopTree() {
-    //TODO: Percorrer o map e ver se tem arvore 2, se sim, executar a função
-    setLog(log + 1)
+    const updatedField = new Map(field);
+    let treesChopped = 0;
+
+    for (const [key, value] of updatedField.entries()) {
+      if(value === 2){
+        updatedField.set(key, 0);
+        treesChopped ++
+      }
+    }
+   
+    
+
+    if(treesChopped > 0){
+    setLog(log + treesChopped)
     const dropChance = 30
-    if (Math.random() * 100 < dropChance) {
-      setSeeds(seeds + 1)
+      
+    const dropSeeds = Math.floor(Math.random() * treesChopped)
+   
+    if(dropSeeds < dropChance){
+    setSeeds(seeds + dropSeeds)
+    }
+    setField(updatedField);
+    
+  } else {
+    alert('Não há arvores para serem cortadas!')
     }
   }
 
@@ -94,14 +118,6 @@ export function Home({ field, setField }) {
     }
   }
 
-  function minSeeds() {
-    if (seeds >= 1) {
-      setSeeds(seeds - 1)
-    }
-    else {
-      alert("não tem")
-    }
-  }
   function fastFoward() {
     if (log >= 2) {
       const interval = setInterval(() => {
@@ -111,7 +127,7 @@ export function Home({ field, setField }) {
 
       setTimeout(() => {
         clearInterval(interval);
-        speed = 0.018;
+        speed = 0.010;
       }, 5000);
     }
   }
@@ -167,7 +183,7 @@ export function Home({ field, setField }) {
 function MoveSun() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const radius = 410;
-  const angleRef = useRef(0);
+  const angleRef = useRef(250);
 
 
   useEffect(() => {
@@ -183,7 +199,7 @@ function MoveSun() {
     animate();
 
     return () => {
-      angleRef.current = 0;
+      angleRef.current = 250;
     };
   }, []);
 
@@ -191,9 +207,7 @@ function MoveSun() {
     <div
       style={{
         position: 'relative',
-        top: `-16rem`,
-        left: `-5rem`,
-        transform: `translate(${position.x + 350}px, ${position.y + 550}px)`,
+        transform: `translate(${position.x + 245}px, ${position.y + 300}px)`,
         width: '50px',
         height: '50px',
         backgroundColor: 'yellow',
@@ -205,7 +219,6 @@ function MoveSun() {
 
 export function NightSystem() {
   const initialColor = 'rgba(69, 192, 233, 0.507)';
-  const darkColor = 'rgba(0, 51, 102, 0.507)';
   const [backgroundColor, setBackgroundColor] = useState(initialColor);
   const [isDarkening, setIsDarkening] = useState(true);
 
@@ -220,7 +233,7 @@ export function NightSystem() {
       if (isDarkening) {
         newColor = rgb.map((value, index) => {
           const minValue = [0, 51, 102][index];
-          return Math.max(value - 10, minValue);
+          return Math.max(value - 3.009, minValue);
         });
 
         if (newColor.every((value, index) => value <= [0, 51, 102][index])) {
@@ -228,7 +241,7 @@ export function NightSystem() {
         }
       } else {
         newColor = rgb.map((value, index) => {
-          return Math.min(value + 10, [69, 192, 233][index]);
+          return Math.min(value + 9.8, [69, 192, 233][index]);
         });
 
         if (newColor.every((value, index) => value === Number(rgba[index]))) {

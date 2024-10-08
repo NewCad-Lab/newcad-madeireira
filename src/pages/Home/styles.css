@@ -124,3 +124,17 @@
     margin-left: 1rem;
     top: 22.5rem;
 }
+.cell {
+    width: 70px; 
+    height: 70px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: green; 
+  }
+  
+  .cell img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
