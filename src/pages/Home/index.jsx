@@ -5,13 +5,10 @@ import './stylesTerrain.css'
 let speed = 0.0050;
 
 export function Terrain({ field }) {
-<<<<<<< HEAD
   const images = {       
     1: 'https://www.svgrepo.com/show/335280/seed.svg',   
     2: 'https://www.svgrepo.com/show/530307/tree.svg',          
   };
-=======
->>>>>>> b2e2df761f516b0d83fbea942c289ca00c3b395d
 
   return (
     <main>
@@ -55,15 +52,17 @@ export function Home({ field, setField }) {
 
   function plant() {
     const updatedField = new Map(field);
-    const emptyCells = Array.from(updatedField.entries()).filter(([field, value]) => value === 0);
-
+    const emptyCells = Array.from(updatedField.entries()).filter(([_, value]) => value === 0);
+  
     if (emptyCells.length > 0 && seeds > 0) {
       const randomIndex = Math.floor(Math.random() * emptyCells.length);
-      const [field] = emptyCells[randomIndex];
-
-      updatedField.set(field, 1);
+      const [cellKey] = emptyCells[randomIndex];
+  
+      updatedField.set(cellKey, 1);
       setField(updatedField);
       setSeeds(seeds - 1);
+
+      let timeToGrowth = 10000;
 
       setTimeout(() => {
         for (const [key, value] of updatedField.entries()) {
@@ -73,15 +72,30 @@ export function Home({ field, setField }) {
         }
         
         setField(new Map(updatedField)); 
-      }, 2000);
-
+      }, timeToGrowth);
     } else {
       alert("Não há células vazias ou não há sementes!");
     }
-
+  }
+  function fastFoward() {
+    if (log >= 2) {
+      setLog(log - 2);  
+      speed = 0.02;
+  
+      let fastGrowthField = new Map(field);
+      
+      for (const [key, value] of fastGrowthField.entries()) {
+        if (value === 1) {  
+          setTimeout(() => {
+            fastGrowthField.set(key, 2);  
+            setField(new Map(fastGrowthField));  
+            speed = 0.0050;
+          }, 5000); 
+        }
+      }
+    }
   }
 
- 
   function chopTree() {
     const updatedField = new Map(field);
     let treesChopped = 0;
@@ -92,8 +106,6 @@ export function Home({ field, setField }) {
         treesChopped ++
       }
     }
-   
-    
 
     if(treesChopped > 0){
     setLog(log + treesChopped)
@@ -120,21 +132,8 @@ export function Home({ field, setField }) {
       alert("troncos insuficientes")
     }
   }
-
-  function fastFoward() {
-    if (log >= 2) {
-      const interval = setInterval(() => {
-        speed = 0.02;
-        setLog(log - 2)
-      },);
-
-      setTimeout(() => {
-        clearInterval(interval);
-        speed = 0.010;
-      }, 5000);
-    }
-  }
-
+  
+  
   return (
     <main>
 

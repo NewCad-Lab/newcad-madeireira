@@ -108,14 +108,14 @@
     background-color: rgb(102, 240, 113);
 }
 
-.container .log {
-    & p {
-        margin-left: 1rem;
-        top: 22.5rem;
-        font-size: large;
-        font-weight: 600;
-        font-family: roboto;
-    }
+.container .log p{
+   
+    margin-left: 1rem;
+    top: 22.5rem;
+    font-size: large;
+    font-weight: 600;
+    font-family: roboto;
+    
 }
 
 .container .log img {

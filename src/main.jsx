@@ -15,7 +15,6 @@ function App() {
       <NightSystem/>
       <Terrain field={field} /> {}
       <Home field={field} setField={setField} /> {}
-      <Home field = {field} setField={setField} /> {}
     </div>
   );
 }
