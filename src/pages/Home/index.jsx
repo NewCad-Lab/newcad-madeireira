@@ -9,7 +9,7 @@ import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 export function Home() {
   const [field, setField] = useState(Array(5).fill(0).map(() => Array(5).fill(0)));
   const [seeds, setSeeds] = useState(3);
-  const [log, setLog] = useState(10)
+  const [log, setLog] = useState(0)
   const [priceLogs, setPriceLogs] = useState(2);
   let growthTime = 5000;
 
