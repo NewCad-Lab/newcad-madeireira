@@ -1,35 +1,49 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { Home } from '../pages/Home';
 
 
-export const Sun = ({ position }) => {
+
+export const Sun = ({ position, velocity }) => {
     const sunRef = useRef()
+    const lightRef = useRef();
     const [angle, setAngle] = useState(0)
 
+
     useFrame((state, delta) => {
-        setAngle((prev) => prev + delta * 0.5)
+        setAngle((prev) => prev + delta * velocity)
         const radius = 8
         const x = Math.cos(angle) * radius
         const z = Math.sin(angle) * radius
 
         sunRef.current.position.set(-x + 2, -z, 2)
-    })
+
+        if (lightRef.current) {
+            lightRef.current.position.copy(sunRef.current.position);
+        }
+    });
+
 
     return (
-        <mesh ref={sunRef} position={position}>
-            <sphereGeometry args={[0.5, 32, 32]} />
-            <meshStandardMaterial color={"yellow"} />
-        </mesh>
+        <>
+            <mesh ref={sunRef} position={position}>
+                <sphereGeometry args={[0.5, 32, 32]} />
+                <meshStandardMaterial color={"yellow"} />
+            </mesh>
+           
+        </>
     )
 }
 
-export const Moon = ({ position }) => {
-    const moonRef = useRef()
-    const [angle, setAngle] = useState(0)
+
+export const Moon = ({ position, velocity }) => {
+    const moonRef = useRef();
+    const [angle, setAngle] = useState(0);
+
 
     useFrame((state, delta) => {
-        setAngle((prev) => prev + delta * 0.5)
+        setAngle((prev) => prev + delta * velocity)
         const radius = 8
         const x = Math.cos(angle) * radius
         const z = Math.sin(angle) * radius
@@ -46,13 +60,10 @@ export const Moon = ({ position }) => {
 
 
 
+
+
+
 const Terrain = () => {
-    return (
-        <mesh>
-            <PerspectiveCamera makeDefault position={[0, 0, 15]} />
-            <Sun position={[-5, 5, -10]} />
-            <Moon position={[5, 20, 10]} />
-        </mesh>
-    )
+
 }
 export default Terrain;

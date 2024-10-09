@@ -1,19 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './styles.css';
-import Terrain from '../../components/Terrain';
+import Terrain, { Moon, Sun } from '../../components/Terrain';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 
 
 
 
-let speed = 0.0050;
-
 export function Home() {
   const [field, setField] = useState(Array(5).fill(0).map(() => Array(5).fill(0)));
   const [seeds, setSeeds] = useState(3);
   const [log, setLog] = useState(0)
-
+  const [velocity, setVelocity] = useState(0.5);
+  const [growthTime, setGrowthTime] = useState(6000);
 
   const colors = [
     '#27a50a',
@@ -70,7 +69,7 @@ export function Home() {
                 <cylinderGeometry args={[0.09, 0.12, 0.8]} />
                 <meshStandardMaterial color={"brown"} />
               </mesh>
-              <mesh key={`tree2-${i}-${j}`} position={[i, 1, j]}>
+              <mesh key={`tree2-${i}-${j}`} position={[i, 0.98, j]}>
                 <cylinderGeometry args={[0.15, 0.35, 0.35]} />
                 <meshStandardMaterial color={getRandomColor()} />
               </mesh>
@@ -106,15 +105,6 @@ export function Home() {
       setField(newField);
       setSeeds(seeds - 1);
 
-      setTimeout(() => {
-        for (const [key, value] of updatedField.entries()) {
-          if (value === 1) {
-            updatedField.set(key, 2); 
-          }
-        }
-        
-        setField(new Map(updatedField)); 
-      }, 2000);
 
     } else {
       alert("Não há células vazias ou não há sementes!");
@@ -124,13 +114,17 @@ export function Home() {
 
  
   function chopTree() {
-    const updatedField = new Map(field);
+
+    const newField = field.map(r => [...r]);
     let treesChopped = 0;
 
-    for (const [key, value] of updatedField.entries()) {
-      if(value === 2){
-        updatedField.set(key, 0);
-        treesChopped ++
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 5; col++) {
+        if (field[row][col] === 3) {
+          newField[row][col] = 0;
+          setField(newField);
+          treesChopped++
+        }
       }
     }
    
@@ -145,7 +139,6 @@ export function Home() {
     if(dropSeeds < dropChance){
     setSeeds(seeds + dropSeeds)
     }
-    setField(updatedField);
     
   } else {
     alert('Não há arvores para serem cortadas!')
@@ -158,31 +151,82 @@ export function Home() {
       setLog(log - 1);
     }
     else {
-      alert("troncos insuficientes")
+      alert("Troncos insuficientes!")
     }
   }
+
+  function growth() {
+    const interval = setInterval(() => {
+        setField(prevField => {
+            const updatedField = prevField.map(r => [...r]);
+
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 5; col++) {
+
+                    if (updatedField[row][col] === 1) {
+                        updatedField[row][col] = 2; 
+                    }
+
+                    else if (updatedField[row][col] === 2) {
+                        updatedField[row][col] = 3; 
+                    }
+                }
+                
+            }
+            return updatedField; 
+        });
+    }, growthTime); 
+
+    return () => clearInterval(interval); 
+}
+
+
+
+  useEffect(() => {
+    const intervalClean = growth()
+    return intervalClean;
+  }, []);
+
 
   function fastFoward() {
-    if (log >= 2) {
-      const interval = setInterval(() => {
-        speed = 0.02;
-        setLog(log - 2)
-      },);
-
+    //if (log >= 0) { 
+      //setLog(log - 2); 
+      const newGrowthTime = 3000;
       setTimeout(() => {
-        clearInterval(interval);
-        speed = 0.010;
-      }, 5000);
-    }
+        setGrowthTime(newGrowthTime);
+      }, 5000); 
+    //} else {
+    //  alert("Troncos insuficientes!"); 
+   // }
   }
+
+   const fastSunMoon = () => {
+   // if(log > 0){
+    //  setLog(log-2)
+    const intervalSunMoon = setInterval(() => {
+      console.log("fast!");
+      setVelocity(2);
+    },);
+
+    setTimeout(() => {
+      clearInterval(intervalSunMoon);
+      setVelocity(0.5);
+    }, 6000);
+ // }else{
+ //   alert("Troncos insuficientes!")
+ // }
+  } 
+
 
   return (
     <main className="flex-container">
       <div className="canvas-container">
         <Canvas style={{ width: '100%', height: '100%' }}>
-          <OrbitControls />
-          <ambientLight intensity={1} />
-          <Terrain />
+          <OrbitControls/>
+          <PerspectiveCamera makeDefault position={[15, 5, 10]}/>
+          <ambientLight intensity={3} />
+          <Sun position={[-5, 5, -10]}velocity={velocity}/>
+            <Moon position={[5, 20, 10]} velocity={velocity}/>
           <Plane position={[-10, 0, 0]} field={field} />
         </Canvas>
       </div>
@@ -211,7 +255,7 @@ export function Home() {
           </div>
 
           <div className="button-item">
-            <button id="button" className="button-fast-foward" onClick={fastFoward}>
+            <button id="button" className="button-fast-foward" onClick={fastSunMoon}>
               <img className="imagem" src="https://www.svgrepo.com/show/464927/fast-forward.svg" alt="" />
             </button>
             <p>Acelerar o tempo</p>
@@ -228,43 +272,6 @@ export function Home() {
 
 }
 
-
-function MoveSun() {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const radius = 410;
-  const angleRef = useRef(250);
-
-
-  useEffect(() => {
-    const animate = () => {
-      angleRef.current += speed;
-      const x = radius * Math.cos(angleRef.current);
-      const y = radius * Math.sin(angleRef.current);
-
-      setPosition({ x, y });
-
-      requestAnimationFrame(animate);
-    };
-    animate();
-
-    return () => {
-      angleRef.current = 250;
-    };
-  }, []);
-
-  return (
-    <div
-      style={{
-        position: 'relative',
-        transform: `translate(${position.x + 245}px, ${position.y + 300}px)`,
-        width: '50px',
-        height: '50px',
-        backgroundColor: 'yellow',
-        borderRadius: '50%',
-      }}
-    />
-  );
-}
 
 export function NightSystem() {
   const initialColor = 'rgba(69, 192, 233, 0.507)';
