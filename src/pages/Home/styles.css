@@ -91,16 +91,6 @@
     background-color: rgb(102, 240, 113);
 }
 
-<<<<<<< HEAD
-.container .log p{
-   
-    margin-left: 1rem;
-    top: 22.5rem;
-    font-size: large;
-    font-weight: 600;
-    font-family: roboto;
-    
-=======
 .container .log p {
     position: absolute;
     top: 93%;
@@ -109,7 +99,6 @@
     font-weight: 600;
     font-family: roboto;
 
->>>>>>> 857f78d1d7208aa77f02a0d13510685053995ffb
 }
 
 .container .log img {

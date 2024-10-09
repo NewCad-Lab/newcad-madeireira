@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './styles.css';
 import Terrain from '../../components/Terrain';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -6,13 +6,12 @@ import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 
 
 
-
-let speed = 0.0050;
-
 export function Home() {
   const [field, setField] = useState(Array(5).fill(0).map(() => Array(5).fill(0)));
   const [seeds, setSeeds] = useState(3);
-  const [log, setLog] = useState(0)
+  const [log, setLog] = useState(10)
+  const [priceLogs, setPriceLogs] = useState(2);
+  let growthTime = 5000;
 
 
   const colors = [
@@ -30,6 +29,7 @@ export function Home() {
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
+  const [c1, c2, c3] = useMemo(() => new Array(3).fill(1).map(getRandomColor), [])
 
   const Plane = () => {
     const grid = [];
@@ -59,7 +59,7 @@ export function Home() {
               </mesh>
               <mesh key={`minitree2-${i}-${j}`} position={[i, 0.5, j]}>
                 <cylinderGeometry args={[0.001, 0.15, 0.4]} />
-                <meshStandardMaterial color={getRandomColor()} />
+                <meshStandardMaterial color={c1} />
               </mesh>
             </>
           );
@@ -72,11 +72,11 @@ export function Home() {
               </mesh>
               <mesh key={`tree2-${i}-${j}`} position={[i, 1, j]}>
                 <cylinderGeometry args={[0.15, 0.35, 0.35]} />
-                <meshStandardMaterial color={getRandomColor()} />
+                <meshStandardMaterial color={c2} />
               </mesh>
               <mesh key={`tree25-${i}-${j}`} position={[i, 1.35, j]}>
                 <cylinderGeometry args={[0.01, 0.3, 0.4]} />
-                <meshStandardMaterial color={getRandomColor()} />
+                <meshStandardMaterial color={c3} />
               </mesh>
             </>
           );
@@ -89,7 +89,6 @@ export function Home() {
 
 
   function plant() {
-
     const emptyCells = [];
     for (let row = 0; row < 5; row++) {
       for (let col = 0; col < 5; col++) {
@@ -106,64 +105,87 @@ export function Home() {
       setField(newField);
       setSeeds(seeds - 1);
 
-      let timeToGrowth = 10000;
+    }
+  }
+
+  function growth() {
+    const interval = setInterval(() => {
+        setField(prevField => {
+            const updatedField = prevField.map(r => [...r]);
+
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 5; col++) {
+                    
+                    if (updatedField[row][col] === 1) {
+                        updatedField[row][col] = 2; 
+                    }
+                    
+                    else if (updatedField[row][col] === 2) {
+                        updatedField[row][col] = 3; 
+                    }
+                }
+            }
+            return updatedField; 
+        });
+    }, growthTime); 
+
+    return () => clearInterval(interval); 
+}
+
+
+
+  useEffect(() => {
+    const intervalClean = growth()
+    return intervalClean;
+  }, []);
+
+
+  
+  function fastFoward() {
+    if (log >= priceLogs) {
+      setLog(log - priceLogs); 
+      setPriceLogs(priceLogs * 2); 
+
+      const previousGrowthTime = growthTime;
+      growthTime = 1000;
 
       setTimeout(() => {
-        for (const [key, value] of updatedField.entries()) {
-          if (value === 1) {
-            updatedField.set(key, 2); 
-          }
-        }
-        
-        setField(new Map(updatedField)); 
-      }, timeToGrowth);
+        growthTime = previousGrowthTime;
+      }, 5000);
     } else {
-      alert("Não há células vazias ou não há sementes!");
+      alert("Troncos insuficientes!");
     }
   }
-  function fastFoward() {
-    if (log >= 2) {
-      setLog(log - 2);  
-      speed = 0.02;
+
   
-      let fastGrowthField = new Map(field);
-      
-      for (const [key, value] of fastGrowthField.entries()) {
-        if (value === 1) {  
-          setTimeout(() => {
-            fastGrowthField.set(key, 2);  
-            setField(new Map(fastGrowthField));  
-            speed = 0.0050;
-          }, 5000); 
-        }
-      }
-    }
-  }
+  
+    
+  
 
   function chopTree() {
     const updatedField = new Map(field);
     let treesChopped = 0;
 
     for (const [key, value] of updatedField.entries()) {
-      if(value === 2){
+      if (value === 0) {
         updatedField.set(key, 0);
-        treesChopped ++
+        treesChopped++
       }
     }
 
-    if(treesChopped > 0){
-    setLog(log + treesChopped)
-    const dropChance = 30
-      
-    const dropSeeds = Math.floor(Math.random() * treesChopped)
-   
-    if(dropSeeds < dropChance){
-    setSeeds(seeds + dropSeeds)
-    }
-    setField(updatedField);
-    
-  } else {
-    alert('Não há arvores para serem cortadas!')
+    if (treesChopped > 0) {
+      setLog(log + treesChopped)
+      const dropChance = 30
+
+      const dropSeeds = Math.floor(Math.random() * treesChopped)
+
+      if (dropSeeds < dropChance) {
+        setSeeds(seeds + dropSeeds)
+      }
+      setField(updatedField);
+
+    } else {
+      alert('Não há arvores para serem cortadas!')
     }
   }
 
@@ -176,8 +198,8 @@ export function Home() {
       alert("troncos insuficientes")
     }
   }
-  
-  
+
+
   return (
     <main className="flex-container">
       <div className="canvas-container">
@@ -229,6 +251,7 @@ export function Home() {
   );
 
 }
+
 
 
 function MoveSun() {
