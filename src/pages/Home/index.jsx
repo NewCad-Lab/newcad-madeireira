@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './styles.css';
 import Terrain, { Moon, Sun } from '../../components/Terrain';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -13,6 +13,7 @@ export function Home() {
   const [log, setLog] = useState(0)
   const [velocity, setVelocity] = useState(0.5);
   const [growthTime, setGrowthTime] = useState(6000);
+  const [priceLogs, setPriceLogs] = useState(2);
 
   const colors = [
     '#27a50a',
@@ -29,6 +30,7 @@ export function Home() {
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
+  const [c1, c2, c3] = useMemo(() => new Array(3).fill(1).map(getRandomColor), [])
 
   const Plane = () => {
     const grid = [];
@@ -58,7 +60,7 @@ export function Home() {
               </mesh>
               <mesh key={`minitree2-${i}-${j}`} position={[i, 0.5, j]}>
                 <cylinderGeometry args={[0.001, 0.15, 0.4]} />
-                <meshStandardMaterial color={getRandomColor()} />
+                <meshStandardMaterial color={c1} />
               </mesh>
             </>
           );
@@ -71,11 +73,11 @@ export function Home() {
               </mesh>
               <mesh key={`tree2-${i}-${j}`} position={[i, 0.98, j]}>
                 <cylinderGeometry args={[0.15, 0.35, 0.35]} />
-                <meshStandardMaterial color={getRandomColor()} />
+                <meshStandardMaterial color={c2} />
               </mesh>
               <mesh key={`tree25-${i}-${j}`} position={[i, 1.35, j]}>
                 <cylinderGeometry args={[0.01, 0.3, 0.4]} />
-                <meshStandardMaterial color={getRandomColor()} />
+                <meshStandardMaterial color={c3} />
               </mesh>
             </>
           );
@@ -88,7 +90,6 @@ export function Home() {
 
 
   function plant() {
-
     const emptyCells = [];
     for (let row = 0; row < 5; row++) {
       for (let col = 0; col < 5; col++) {
@@ -189,20 +190,25 @@ export function Home() {
 
 
   function fastFoward() {
-    //if (log >= 0) { 
-      //setLog(log - 2); 
-      const newGrowthTime = 3000;
+    console.log("fastforward")
+    if (log >= priceLogs) {
+      setLog(log - priceLogs); 
+      setPriceLogs(priceLogs * 2); 
+
+      const previousGrowthTime = growthTime;
+      setGrowthTime (1000);
+
       setTimeout(() => {
-        setGrowthTime(newGrowthTime);
-      }, 5000); 
-    //} else {
-    //  alert("Troncos insuficientes!"); 
-   // }
+        setGrowthTime (previousGrowthTime);
+      }, 5000);
+    } else {
+      alert("Troncos insuficientes!");
+    }
   }
 
    const fastSunMoon = () => {
-   // if(log > 0){
-    //  setLog(log-2)
+    if (log >= priceLogs) {
+      
     const intervalSunMoon = setInterval(() => {
       console.log("fast!");
       setVelocity(2);
@@ -212,11 +218,15 @@ export function Home() {
       clearInterval(intervalSunMoon);
       setVelocity(0.5);
     }, 6000);
- // }else{
- //   alert("Troncos insuficientes!")
- // }
+  }else{
+    alert("Troncos insuficientes!")
+  }
   } 
 
+  const doubleFastFunction = () => {
+    fastFoward();
+    fastSunMoon();
+  }
 
   return (
     <main className="flex-container">
@@ -224,7 +234,7 @@ export function Home() {
         <Canvas style={{ width: '100%', height: '100%' }}>
           <OrbitControls/>
           <PerspectiveCamera makeDefault position={[15, 5, 10]}/>
-          <ambientLight intensity={3} />
+          <ambientLight intensity={1.5} />
           <Sun position={[-5, 5, -10]}velocity={velocity}/>
             <Moon position={[5, 20, 10]} velocity={velocity}/>
           <Plane position={[-10, 0, 0]} field={field} />
@@ -255,7 +265,7 @@ export function Home() {
           </div>
 
           <div className="button-item">
-            <button id="button" className="button-fast-foward" onClick={fastSunMoon}>
+            <button id="button" className="button-fast-foward" onClick={doubleFastFunction}>
               <img className="imagem" src="https://www.svgrepo.com/show/464927/fast-forward.svg" alt="" />
             </button>
             <p>Acelerar o tempo</p>
